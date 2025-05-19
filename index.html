@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="bootstrap-icons-1.11.3/font/bootstrap-icons.css">
+    <script>
+        function Loadcategories(){
+            fetch("https://fakestoreapi.com/products/categories")
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(categories){
+                categories.unshift("all")
+                for(var x of categories){
+                    var option=document.createElement("option");
+                    option.text=x;
+                    document.getElementById("category").appendChild(option);
+                }
+            })
+        }
+        function Loadgopi(url){
+            fetch(url)
+            .then(function(response){
+                return response.json();
+            })
+        .then(function(products){
+         document.querySelector("main").innerHTML="";
+         for(var y of products){
+            var div=document.createElement("div");
+            div.className="card p-2 m-2";
+            div.style.width="200px";
+            div.innerHTML=`
+            <img src=${y.image} height="160">
+            <div class="card-header" style="height:130px"><p>${y.title}</p></div>
+            <div class="card-body">
+                <dl>
+                    <dt>price</dt>
+                    <dd>${y.price}</dd>
+                    <dt>Rating</dt>
+                    <dd><span class="bi bi-star-fill text-success"></span>${y.rating.rate}</dd>
+                </dl>
+            </div>
+            <div class=card-footer>
+                <button class="btn btn-danger" onclick="Addclick(${y.id})">Add to Card
+                    <span class="bi bi-cart4"></span>
+                </button>
+            `; 
+            document.querySelector("main").appendChild(div);
+         }
+        })
+        }
+       
+        function bodyload(){
+            Loadcategories();
+            Loadgopi("https://fakestoreapi.com/products")
+        }
+        function allchange(){
+           var Name=document.getElementById("category").value;
+           if(Name=="all"){
+               Loadgopi("https://fakestoreapi.com/products");
+           }else{
+              Loadgopi(`https://fakestoreapi.com/products/category/${Name}`);
+            
+           }
+        }
+        function clicked(Name){
+            if(Name=="all"){
+                Loadgopi("https://fakestoreapi.com/products");
+            }else{
+                Loadgopi(`https://fakestoreapi.com/products/category/${Name}`);
+            }
+        }
+        cartItems=[];
+        function sandeep(){
+            document.getElementById("count").innerHTML=cartItems.length;
+        }
+        function Addclick(id){
+            fetch(`https://fakestoreapi.com/products/${id}`)
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(product){
+                cartItems.push(product);
+                alert(`${product.title}\nAdded to cart`)
+                sandeep();
+            })
+
+
+        }
+        function show(){
+            var tbody=document.querySelector("tbody");
+            tbody.innerHTML='';
+            for(var items of cartItems){
+                var tr=document.createElement("tr");
+                var tdName=document.createElement("td");
+                var tdprice=document.createElement("td");
+                var tdpreview=document.createElement("td");
+                tdName.innerHTML=items.title;
+                tdprice.innerHTML=items.price;
+                tdpreview.innerHTML=`<img src=${items.image} width="50" height="50">`;
+                 tr.appendChild(tdName);
+                 tr.appendChild(tdprice);
+                 tr.appendChild(tdpreview);
+                 document.querySelector("tbody").appendChild(tr);
+
+            }
+        }
+    function payNow(){
+var total=0;
+for(var item of cartItems)
+{
+total+=item.price;
+}
+var options = {
+"key": "rzp_test_1DP5mmOlF5G5ag", // Test Key
+"amount": total * 100, // Amount in paise
+"currency": "INR",
+"name": "coding brains Store",
+"description": "Test Transaction",
+"handler": function (response) {
+alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
+cartItems = [];
+GetCartItemsCount();
+document.querySelector("tbody").innerHTML = "";
+},
+"prefill": {
+"name": "Test User",
+"email": "test@example.com",
+"contact": "9999999999"
+},
+"theme": {
+"color": "#3399cc"
+}
+};
+var rzp1 = new Razorpay(options);
+rzp1.open();
+}
+    </script>
+    <style>
+        a{
+            color:black;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body onload="bodyload()" >
+    <header class="container-fluid d-flex justify-content-between bg-primary mt-2">
+        <div>
+            <h3>.Shoppers</h3>
+        </div>
+        <div>
+            <span class="me-2"><a href="javascript:clicked('all')">Home</span></a>
+            <span class="me-2"><a href="javascript:clicked('electronics')">Electronics</span></a>
+            <span class="me-2"><a href="javascript:clicked('jewelery')">Jewelery</span></a>
+            <span class="me-2"><a href="javascript:clicked('men\'s clothing')">Men'sclothing</span></a>
+            <span ><a href="javascript:clicked('women\'s clothing')">women'sclothing</span></a>
+        </div>
+        <div>
+            <span class="bi bi-heart"></span>
+            <span class="bi bi-person-fill"></span>
+           <a href="#register" data-bs-toggle="modal" onclick="show()"><span class="bi bi-cart" ></span><span class="badge rounded-circle rounded bg-danger " id="count">0</span></a>
+              <div class="modal" id="register">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>booked status</h2>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                    <th>Name</th>
+                                    <th>price</th>
+                                    <th>preview</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="payNow()">Proceed To Pay</button>
+                        </div>
+                    </div>
+                </div>
+              </div>
+        </div>
+    </header>
+    <section class="row">
+        <nav class="col-2">
+            <div>
+                <label>Select Items</label>
+           <div>
+            <select id="category" onchange="allchange()" class="form-control"></select>
+           </div>
+            </div>
+        </nav>
+            <main class="col-10 d-flex flex-wrap ">
+
+            </main>
+
+        
+    </section>
+    <script src="jquery.js"> </script>
+    <script src="bootstrap.bundle.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>
